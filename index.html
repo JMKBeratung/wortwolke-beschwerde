@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wortwolke Monitor</title>
+<style>
+:root{--g:#005750;--s:#F0EAD6;--p:#F4B183;--t:#00C0B1;--r:#E94F35}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--g);color:var(--s);font-family:"Source Sans Pro","Segoe UI",Arial,sans-serif;overflow:hidden}
+header{position:fixed;left:0;right:0;top:0;padding:22px 40px;display:flex;justify-content:space-between;align-items:baseline;z-index:2}
+h1{margin:0;font-size:34px;font-weight:700}
+#info{font-size:18px;color:var(--p)}
+#cloud{position:fixed;left:0;right:290px;top:90px;bottom:0}
+#qr{position:fixed;right:24px;top:110px;width:250px;background:#00443E;border-radius:14px;padding:16px;text-align:center;z-index:2}
+#qr img{width:218px;height:218px;background:#fff;padding:8px;border-radius:8px;display:block;margin:10px auto}
+#qr b{color:var(--p);font-size:22px}#qr small{display:block;font-size:15px;margin-top:4px}
+.w{position:absolute;white-space:nowrap;line-height:1;font-weight:700;transition:opacity .6s,transform .6s;transform-origin:center}
+.w.new{opacity:0;transform:scale(.4)}
+#empty[hidden]{display:none}#empty{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--p);opacity:.8}
+</style></head><body>
+<header><h1 id="q">Wie hat sich Ihre Beschwerde angefühlt?</h1><div id="info">verbinde …</div></header>
+<div id="cloud"></div>
+<div id="qr"><b>Noch mitmachen?</b><small>QR-Code scannen</small><img alt="QR-Code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAmwAAAJsAQAAAABo7sKIAAAD+UlEQVR4Xu2dW46jMBBF7VH+yQ56/8vqHYQVMEpR1X4AP9dEiuRzPmY6PNL4YHWpwGXnLd3I+u/GL0sp8XU6uNPBnQ7udL7bXdq216Ft2x+2yw6xTX7k8v757LTXdzeWq9PBnQ7udHCn8xF3JTh4DFjzjn3M+acOE+m914NIYQ8dH7m62+DqdHCngzsd3Ol8yF0Eh5I5pHf6UPKKnJ/v5OLXw4TTnfapq7uJD7m7Ca5OB3c6uNOZyt3j0lN5kZHT8kpbWnPa0rLtHy+Yyh2N1cGdDu50cKdz4c7yhWf7+Cm9P+Y2r+jhVujgTgd3OrjTmcpd5BVLOx7K0ofAUgpjS+uzEdudNpe7qToKjdXBnQ7udG52t8eKEhec9RkPnezJUxMm/GnU2Wl3X93NjeXrdHCngzsd3Onc7C5f1lfUeYXFheW1b7Pk4vw06isGuPnO8nU6uNPBnc7Xu7MRsN0/QamqKEOg7EVG5B/++iK2fX1j74TG6uBOB3c6uBvAo4GNj7Uau67kzj7G6Fmjjh+x18v1qMUbgG6sgzsd3OlM5a6pxy412laobSNjmxptjyVlyGy3l1gxwFT9jsbq4E4HdwN0k3XU03s0aUY5rkz5cTiYWDEA3VgHdzq405nKXZUqnCUN/tApMoyD1Hh0FcdN5Y7G6uBOB3c6uNMJd8u2dcV38Qri8N1lR5drMB/UEHRjHdzp4E5nKncX88yWiWWPL73r/IO84j6m6nc0Vgd3OrjTadx146BWn2fWJ5u1kbKWfxhtAbcPleJW6OBOB3c6uNOZyt3j/Ve+qrvzCrxmm+ETfVgZdzfRh7HXd0/ljsbq4E4Hdzq4G6CrligPmLrCi/Ir6rcUUYxBfcU4dGMd3OngTmcqd4/kcz/5I6U6r7CZyEtKYT8dsW0xIchU7misDu50cKeDuwFK+lAnEkGddTQjoupRUuX1N2NmB6Ab6+BOB3c6U7lrKuuiWruLGodyvS5qVAupTuWOxurgTgd3OrgboF5qu1k9uy7PPtbi1e81InRs5BUj0I11cKeDO52p3F3UVwQ+FjamfeoeSZUpo8w2sWKIqfodjdXBnQ7udHZ3dXIRWYJXUESRRc4/XlrRRYgIE/Y/t0IHdzq408GdzlTuYg3VGAflI51iNaPzWopmSTwfB7WvpjqVOxqrgzsd3OngTidiRYfV4sVCeHvm8HeEL45XAka1TB63Qgd3OrjTwZ0O7upl8hrO5hO0h1N+Bu4GoN/p4E4HdzpTuYu8Yn+E9Efz0TMMSzNih22rcw2eQY0yVb+jsTq408HdAF3xhHG5rlH3e8qw2jiNW6GDOx3c6eBOZyp3+WzaDpl1Knc0Vgd3OrjTwZ3OfwzdmvC7jXioAAAAAElFTkSuQmCC"><small><b style="font-size:17px">answergarden.ch/5255018</b></small></div><div id="empty" hidden>Noch keine Wörter. Bitte QR-Code scannen.</div>
+<script>
+const GARDEN="5255018", EVERY=3000;           // Aktualisierung alle 3 Sekunden
+const COLORS=["#F0EAD6","#F4B183","#00C0B1","#E94F35","#FFFFFF"];
+const demo=location.search.includes("demo");
+let last="", shown=new Set();
+const cloud=document.getElementById("cloud"), info=document.getElementById("info"), empty=document.getElementById("empty");
+const ctx=document.createElement("canvas").getContext("2d");
+function hash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
+function layout(words){
+  const W=cloud.clientWidth,H=cloud.clientHeight,cx=W/2,cy=H/2,max=Math.max(...words.map(w=>w.weight)),min=Math.min(...words.map(w=>w.weight));
+  const maxS=Math.min(H*0.16,100),minS=28,placed=[],out=[];
+  words.sort((a,b)=>b.weight-a.weight||a.text.localeCompare(b.text));
+  for(const w of words){
+    const k=max===min?0.6:(w.weight-min)/(max-min);
+    let size=minS+(maxS-minS)*Math.sqrt(k)*(max>1?1:0.6);
+    for(let tries=0;tries<12;tries++){
+      ctx.font="700 "+size+'px "Source Sans Pro","Segoe UI",Arial';
+      const tw=ctx.measureText(w.text).width+16,th=size*1.05;
+      let ok=false,x=0,y=0;
+      for(let a=0;a<2400;a+=1){
+        const ang=a*0.35,rad=2.2*a*0.12;
+        x=cx+Math.cos(ang)*rad*1.6-tw/2; y=cy+Math.sin(ang)*rad-th/2;
+        if(x<8||y<4||x+tw>W-8||y+th>H-4)continue;
+        if(!placed.some(p=>x<p.x+p.w&&x+tw>p.x&&y<p.y+p.h&&y+th>p.y)){ok=true;break}
+      }
+      if(ok){placed.push({x,y,w:tw,h:th});out.push({...w,size,x:x+8,y});break}
+      size*=0.88;
+    }
+  }
+  return out;
+}
+function render(list){
+  empty.hidden=list.length>0;
+  const total=list.reduce((a,w)=>a+w.weight,0);
+  info.textContent=total+" Antworten, "+list.length+" verschiedene Wörter · aktualisiert "+new Date().toLocaleTimeString("de-DE");
+  const key=JSON.stringify(list.map(w=>[w.text,w.weight]));
+  if(key===last)return; last=key;
+  const pos=layout(list.map(w=>({text:w.text,weight:w.weight})));
+  cloud.innerHTML="";
+  for(const w of pos){
+    const d=document.createElement("div");d.className="w"+(shown.has(w.text)?"":" new");d.textContent=w.text;
+    d.style.cssText+=`left:${w.x}px;top:${w.y}px;font-size:${w.size}px;color:${COLORS[hash(w.text)%COLORS.length]}`;
+    cloud.appendChild(d);requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.remove("new")));shown.add(w.text);
+  }
+}
+function demoData(){return [["Ärger",9],["Scham",7],["Ungerechtigkeit",6],["Kränkung",5],["Angst",4],["Frust",4],["Hilflosigkeit",3],["Dankbarkeit",3],["Überforderung",2],["Respekt",2],["Chance",2],["Ohnmacht",1],["Lernen",1],["Erleichterung",1],["Druck",1]].map(([text,weight])=>({text,weight}))}
+function poll(){
+  if(demo){render(demoData());return}
+  const s=document.createElement("script");
+  s.src="https://answergarden.ch/api/array/"+GARDEN+"?t="+Date.now();
+  s.onload=()=>{try{render((window.word_list||[]).map(w=>({text:String(w.text),weight:Number(w.weight)||1})))}catch(e){info.textContent="Fehler bei der Anzeige"}s.remove()};
+  s.onerror=()=>{info.textContent="keine Verbindung, nächster Versuch in 3 s";s.remove()};
+  document.head.appendChild(s);
+}
+poll(); setInterval(poll,EVERY);
+addEventListener("resize",()=>{last="";poll()});
+addEventListener("keydown",e=>{if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+</script></body></html>
